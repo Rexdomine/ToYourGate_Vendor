@@ -5,76 +5,76 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tyg_vendor/constants/location.dart';
-import 'package:tyg_vendor/features/authentication/controller/auth_controller.dart';
-import 'package:tyg_vendor/features/authentication/presentation/login.dart';
+import 'package:tyg_vendor/features/profile/controller/profile.dart';
 
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_style.dart';
+import '../../../constants/location.dart';
+import '../../authentication/presentation/login.dart';
 
-class RegisterScreen extends StatefulWidget {
-  RegisterScreen({super.key});
+class UpdateShopScreen extends StatefulWidget {
+  const UpdateShopScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<UpdateShopScreen> createState() => _UpdateShopScreenState();
 }
 
-File? logoPath;
-File? backgroundPath;
-List<int>? logoImageBytes;
-List<int>? backgroundImageByte;
+File? _logoPath;
+File? _backgroundPath;
+List<int>? _logoImageBytes;
+List<int>? _backgroundImageByte;
 
-class _RegisterScreenState extends State<RegisterScreen> {
-    final _authController = Get.put(AuthController());
-    final locationController = Get.put(GetGeoLocation());
-    final _registerKey = GlobalKey<FormState>();
-    final ImagePicker _picker = ImagePicker();
-    TextEditingController firstNameController = TextEditingController();
-    TextEditingController lastNameController = TextEditingController();
-    TextEditingController personalPhoneController = TextEditingController();
-    TextEditingController shopNameController = TextEditingController();
-    TextEditingController shopPhonrController = TextEditingController();
-    TextEditingController addressController = TextEditingController();
-    TextEditingController emailController = TextEditingController();
-    TextEditingController categoryController = TextEditingController();
-    TextEditingController minimumDeliveryPriceController =
-        TextEditingController();
-    TextEditingController descriptionController = TextEditingController();
-    TextEditingController pricePerkmController = TextEditingController();
-    TextEditingController deliveryTimeController = TextEditingController();
-    TextEditingController minimumAmountController = TextEditingController();
-    TextEditingController taxController = TextEditingController();
-    TextEditingController comissionController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-    Future<void> pickLogo() async {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        // Do something with the picked image
-        setState(() {
-          logoPath = File(image.path);
-          logoImageBytes = logoPath!.readAsBytesSync();
-        });
-        print('Image path: ${image.path}');
-      } else {
-        // User canceled the picker
-        print('No image selected.');
-      }
+class _UpdateShopScreenState extends State<UpdateShopScreen> {
+  final _profileController = Get.put(ProfileController());
+  final locationController = Get.put(GetGeoLocation());
+  final _registerKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
+  TextEditingController _firstNameController = TextEditingController();
+  TextEditingController _lastNameController = TextEditingController();
+  TextEditingController _personalPhoneController = TextEditingController();
+  TextEditingController _shopNameController = TextEditingController();
+  TextEditingController _shopPhonrController = TextEditingController();
+  TextEditingController _addressController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _categoryController = TextEditingController();
+  TextEditingController _minimumDeliveryPriceController =
+      TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+  TextEditingController _pricePerkmController = TextEditingController();
+  TextEditingController _deliveryTimeController = TextEditingController();
+  TextEditingController _minimumAmountController = TextEditingController();
+  TextEditingController _taxController = TextEditingController();
+  TextEditingController _comissionController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  Future<void> _pickLogo() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      // Do something with the picked image
+      setState(() {
+        _logoPath = File(image.path);
+        _logoImageBytes = _logoPath!.readAsBytesSync();
+      });
+      print('Image path: ${image.path}');
+    } else {
+      // User canceled the picker
+      print('No image selected.');
     }
+  }
 
-    Future<void> pickbackGround() async {
-      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-      if (image != null) {
-        // Do something with the picked image
-        setState(() {
-          backgroundPath = File(image.path);
-          backgroundImageByte = backgroundPath!.readAsBytesSync();
-        });
-        print('Image path: ${image.path}');
-      } else {
-        // User canceled the picker
-        print('No image selected.');
-      }
+  Future<void> _pickbackGround() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      // Do something with the picked image
+      setState(() {
+        _backgroundPath = File(image.path);
+        _backgroundImageByte = _backgroundPath!.readAsBytesSync();
+      });
+      print('Image path: ${image.path}');
+    } else {
+      // User canceled the picker
+      print('No image selected.');
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +85,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0.0,
         centerTitle: true,
         title: Text(
-          'Registeration',
+          'Update shop',
           style: AppStyles.poppinsText(
               fontWeight: FontWeight.w500,
               size: 14,
@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: shopNameController,
+                        controller: _shopNameController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -145,7 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: firstNameController,
+                        controller: _firstNameController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -160,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: lastNameController,
+                        controller: _lastNameController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -175,7 +175,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: personalPhoneController,
+                        controller: _personalPhoneController,
                         keyboardType: TextInputType.phone,
                         obscureText: false,
                       ),
@@ -190,7 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: shopPhonrController,
+                        controller: _shopPhonrController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -219,7 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: emailController,
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -234,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: categoryController,
+                        controller: _categoryController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -249,7 +249,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: descriptionController,
+                        controller: _descriptionController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -264,7 +264,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: minimumDeliveryPriceController,
+                        controller: _minimumDeliveryPriceController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -279,7 +279,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: pricePerkmController,
+                        controller: _pricePerkmController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -294,7 +294,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: deliveryTimeController,
+                        controller: _deliveryTimeController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -309,7 +309,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: minimumAmountController,
+                        controller: _minimumAmountController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -324,7 +324,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: taxController,
+                        controller: _taxController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -339,7 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.blackColor),
                       ),
                       CustomInputWidget(
-                        controller: comissionController,
+                        controller: _comissionController,
                         keyboardType: TextInputType.emailAddress,
                         obscureText: false,
                       ),
@@ -355,7 +355,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          pickLogo();
+                          _pickLogo();
                         },
                         child: Container(
                             height: 100,
@@ -364,11 +364,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               border: Border.all(
                                   color: AppColors.blackColor.withOpacity(0.2)),
                             ),
-                            child: logoPath == null
+                            child: _logoPath == null
                                 ? Center(child: Icon(Icons.camera_alt))
                                 : Image.file(
                                     File(
-                                      logoPath!.path,
+                                      _logoPath!.path,
                                     ),
                                     fit: BoxFit.cover,
                                   )),
@@ -385,7 +385,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          pickbackGround();
+                          _pickbackGround();
                         },
                         child: Container(
                           height: 100,
@@ -394,38 +394,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             border: Border.all(
                                 color: AppColors.blackColor.withOpacity(0.2)),
                           ),
-                          child: backgroundPath == null
+                          child: _backgroundPath == null
                               ? Center(child: Icon(Icons.camera_alt))
                               : Image.file(
-                                  File(backgroundPath!.path),
+                                  File(_backgroundPath!.path),
                                   fit: BoxFit.cover,
                                 ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 14,
-                      ),
-                      Text(
-                        'Password',
-                        style: AppStyles.poppinsText(
-                            fontWeight: FontWeight.w300,
-                            size: 13,
-                            color: AppColors.blackColor),
-                      ),
-                      Obx(
-                        () => CustomInputWidget(
-                          controller: passwordController,
-                          obscureText: _authController.isObscured.value,
-                          onPressed: () {
-                            // _authController.isObscured.value =
-                            //     !_authController.isObscured.value;
-                          },
-                          keyboardType: TextInputType.visiblePassword,
-                          suffixIcon: Icon(
-                              _authController.isObscured.value
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: AppColors.blackColor),
                         ),
                       ),
                       const SizedBox(
@@ -433,40 +407,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       Obx(
                         () => CustomButtonWidget(
-                          buttonText: 'Proceed',
-                          isLoading: _authController.isLoading.value,
+                          buttonText: 'Update ',
+                          isLoading: _profileController.updatingShop.value,
                           onPressed: () async {
                             FirebaseMessaging firebaseMessaging =
                                 FirebaseMessaging.instance;
                             var deviceToken =
                                 await firebaseMessaging.getToken();
                             var param = {
-                              "name": shopNameController.text,
-                              "shop_phone": shopPhonrController.text,
-                              "description": descriptionController.text,
-                              "category": categoryController.text,
-                              "logo": base64Encode(logoImageBytes!),
-                              "background": base64Encode(backgroundImageByte!),
+                              "name": _shopNameController.text,
+                              "shop_phone": _shopPhonrController.text,
+                              "description": _descriptionController.text,
+                              "category": _categoryController.text,
+                              "logo": base64Encode(_logoImageBytes!),
+                              "background": base64Encode(_backgroundImageByte!),
                               "min_delivery_price":
-                                  minimumDeliveryPriceController.text,
-                              "price_km": pricePerkmController.text,
-                              "delivery_time": deliveryTimeController.text,
-                              "min_amount": minimumAmountController.text,
-                              "tax": taxController.text,
-                              "commission": comissionController.text,
-                              "address": addressController.text,
-                              "firstname": firstNameController.text,
-                              "lastname": lastNameController.text,
-                              "email": emailController.text,
-                              "phone": personalPhoneController.text,
-                              "password": passwordController.text,
+                                  _minimumDeliveryPriceController.text,
+                              "price_km": _pricePerkmController.text,
+                              "__delivery_time": _deliveryTimeController.text,
+                              "_min_amount": _minimumAmountController.text,
+                              "_tax": _taxController.text,
+                              "_commission": _comissionController.text,
+                              "_address": _addressController.text,
+                              "firstname": _firstNameController.text,
+                              "lastname": _lastNameController.text,
+                              "email": _emailController.text,
+                              "phone": _personalPhoneController.text,
+                              "password": _passwordController.text,
                               "longitude": locationController.longitude,
                               "latitude": locationController.latitude,
                               "device_token": deviceToken
                             };
 
                             if (_registerKey.currentState!.validate()) {
-                              _authController.createUserController(param);
+                              _profileController.updateShop(param);
                             }
                           },
                           // ),
@@ -478,49 +452,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                              child: Container(
-                            color: AppColors.blackColor,
-                            height: 1,
-                          )),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            'Or',
-                            style: AppStyles.poppinsText(
-                                fontWeight: FontWeight.w300, size: 12),
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Expanded(
-                              child: Container(
-                            color: AppColors.mainRed,
-                            height: 1,
-                          )),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Center(
-                        child: Text(
-                          'Already have an account',
-                          style: AppStyles.poppinsText(
-                              fontWeight: FontWeight.w300, size: 12),
-                        ),
-                      ),
-                      CustomButtonWidget(
-                          isLoading: false,
-                          buttonText: 'Sign In',
-                          textColor: AppColors.blackColor,
-                          bgcolor: AppColors.whiteColor,
-                          onPressed: () {
-                            Get.to(() => LoginScreen());
-                          })
                     ],
                   ),
                 ),

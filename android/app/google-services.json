@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "793410899543",
+    "project_id": "vendortyg",
+    "storage_bucket": "vendortyg.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:793410899543:android:d9915fdd3697f3ba941d12",
+        "android_client_info": {
+          "package_name": "com.example.tyg_vendor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN5QTz9_xwo3G9Apf1xJ6Cxpaozi48q9I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

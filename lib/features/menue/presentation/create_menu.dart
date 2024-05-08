@@ -20,7 +20,6 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
   List<File> _selectedImages = [];
   Future<void> _pickImages() async {
     if (_selectedImages.length >= 4) {
-      // If the maximum number of images (4) is already selected, return without picking more.
       return;
     }
     final picker = ImagePicker();

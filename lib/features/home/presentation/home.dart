@@ -4,6 +4,9 @@ import 'package:tyg_vendor/constants/app_colors.dart';
 import 'package:tyg_vendor/constants/app_style.dart';
 import 'package:tyg_vendor/features/authentication/presentation/login.dart';
 
+import '../../menue/presentation/create_menu.dart';
+import '../../profile/controller/profile.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,18 +24,42 @@ class _HomeScreenState extends State<HomeScreen>
     tabController = TabController(length: 4, vsync: this);
   }
 
+  final profileController = Get.put(ProfileController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.to(() => CreateMenuScreen());
+        },
+        backgroundColor: AppColors.mainRed,
+        child: Icon(
+          Icons.menu_open,
+          color: AppColors.whiteColor,
+        ),
+      ),
       appBar: AppBar(
         backgroundColor: AppColors.whiteColor,
         elevation: 0.0,
         automaticallyImplyLeading: false,
-        title: Text(
-          'Welcome! TKG Restaurant ',
-          style: AppStyles.poppinsText(
-              fontWeight: FontWeight.w700, size: 17, color: AppColors.mainRed),
+        title: Obx(
+          () => profileController.loadedModel.value.data == null
+              ? Text(
+                  'Welcome! User' ?? '',
+                  style: AppStyles.poppinsText(
+                      fontWeight: FontWeight.w700,
+                      size: 17,
+                      color: AppColors.mainRed),
+                )
+              : Text(
+                  'Welcome! ${profileController.loadedModel.value.data?.name}' ??
+                      '',
+                  style: AppStyles.poppinsText(
+                      fontWeight: FontWeight.w700,
+                      size: 17,
+                      color: AppColors.mainRed),
+                ),
         ),
       ),
       body: Column(

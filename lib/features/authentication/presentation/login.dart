@@ -1,6 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tyg_vendor/features/bottom%20navigation/presentation/bottom_nav.dart';
+import 'package:tyg_vendor/constants/location.dart';
 import '../../../constants/app_colors.dart';
 import '../../../constants/app_style.dart';
 import '../controller/auth_controller.dart';
@@ -9,9 +10,13 @@ import 'register_screen.dart';
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
   final _authController = Get.put(AuthController());
+
+  final _locationController = Get.put(GetGeoLocation());
+
   final TextEditingController _emailTextController = TextEditingController();
   final TextEditingController _passwordTextController = TextEditingController();
   final _loginKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,8 +101,8 @@ class LoginScreen extends StatelessWidget {
                         controller: _passwordTextController,
                         obscureText: _authController.isObscured.value,
                         onPressed: () {
-                          // _authController.isObscured.value =
-                          //     !_authController.isObscured.value;
+                          _authController.isObscured.value =
+                              !_authController.isObscured.value;
                         },
                         keyboardType: TextInputType.visiblePassword,
                         suffixIcon: Icon(
@@ -113,14 +118,22 @@ class LoginScreen extends StatelessWidget {
                     Obx(
                       () => CustomButtonWidget(
                         buttonText: 'Login',
-                        isLoading: _authController.loginUser.value,
-                        onPressed: () {
-                          Get.to(() => BottomNavigationScreen());
-                          // if (_loginKey.currentState!.validate()) {
-                          //   _authController.loginUserController(
-                          //       _emailTextController.text.trim(),
-                          //       _passwordTextController.text.trim());
-                          // }
+                        
+                        isLoading: _authController.loggingIn.value,
+                        onPressed: () async {
+                          FirebaseMessaging firebaseMessaging =
+                              FirebaseMessaging.instance;
+                          var deviceToken = await firebaseMessaging.getToken();
+                          var param = {
+                            "email": _emailTextController.text,
+                            "password": _passwordTextController.text,
+                            "longitude": _locationController.longitude,
+                            "latitude": _locationController.latitude,
+                            "device_token": deviceToken
+                          };
+                          if (_loginKey.currentState!.validate()) {
+                            _authController.loginUserController(param);
+                          }
                         },
                       ),
                     ),

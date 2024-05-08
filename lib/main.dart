@@ -1,17 +1,36 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:tyg_vendor/features/bottom%20navigation/presentation/bottom_nav.dart';
+import 'package:tyg_vendor/constants/location.dart';
 
 import 'features/authentication/presentation/login.dart';
+import 'firebase_messaging.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FireBaseApi().initNotifications();
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+final locationController = Get.put(GetGeoLocation());
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    locationController.determinePosition();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
