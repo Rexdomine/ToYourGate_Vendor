@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tyg_vendor/constants/app_colors.dart';
@@ -39,6 +38,13 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
     });
   }
 
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _priceController = TextEditingController();
+  TextEditingController _quantityController = TextEditingController();
+  TextEditingController _desController = TextEditingController();
+  TextEditingController _deliveryTimeController = TextEditingController();
+  TextEditingController _minQuantityController = TextEditingController();
+  TextEditingController _maxQuantityController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +69,10 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
               style:
                   AppStyles.poppinsText(fontWeight: FontWeight.w300, size: 12),
             ),
-            CustomInputWidget(obscureText: false),
+            CustomInputWidget(
+              obscureText: false,
+              controller: _nameController,
+            ),
             SizedBox(
               height: 10,
             ),
@@ -72,7 +81,10 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
               style:
                   AppStyles.poppinsText(fontWeight: FontWeight.w300, size: 12),
             ),
-            CustomInputWidget(obscureText: false),
+            CustomInputWidget(
+              obscureText: false,
+              controller: _priceController,
+            ),
             SizedBox(
               height: 10,
             ),
@@ -91,6 +103,7 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
                       Border.all(color: AppColors.blackColor.withOpacity(0.4))),
               padding: EdgeInsets.all(10),
               child: TextFormField(
+                controller: _desController,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                 ),
@@ -102,11 +115,50 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
               height: 10,
             ),
             Text(
+              'Quantity',
+              style:
+                  AppStyles.poppinsText(fontWeight: FontWeight.w300, size: 12),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: _quantityController,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
               'Delivery time',
               style:
                   AppStyles.poppinsText(fontWeight: FontWeight.w300, size: 12),
             ),
-            CustomInputWidget(obscureText: false),
+            CustomInputWidget(
+              obscureText: false,
+              controller: _deliveryTimeController,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              'Max Quantity ',
+              style:
+                  AppStyles.poppinsText(fontWeight: FontWeight.w300, size: 12),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: _maxQuantityController,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              'Min Quantity',
+              style:
+                  AppStyles.poppinsText(fontWeight: FontWeight.w300, size: 12),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: _minQuantityController,
+            ),
             SizedBox(
               height: 10,
             ),
@@ -135,28 +187,37 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
                     )
                   : SizedBox(
                       height: MediaQuery.of(context).size.height * 0.04,
-                      child: ListView.separated(
-                        separatorBuilder: (context, index) => Divider(
-                          indent: 5,
-                        ),
-                        itemCount: menuController.addon.length,
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) => Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: AppColors.mainRed),
-                          padding: EdgeInsets.all(5),
-                          child: Center(
-                            child: Text(
-                              menuController.addon[index],
-                              style: AppStyles.poppinsText(
-                                  fontWeight: FontWeight.w500,
-                                  size: 14,
-                                  color: AppColors.whiteColor),
-                            ),
-                          ),
-                        ),
+                      child: Obx(
+                        () => menuController.loading.value
+                            ? SizedBox()
+                            : ListView.separated(
+                                separatorBuilder: (context, index) => Divider(
+                                      indent: 5,
+                                    ),
+                                itemCount: menuController
+                                    .loadedAdons.value.data!.length,
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemBuilder: (context, index) {
+                                  var addedAdons = menuController
+                                      .loadedAdons.value.data![index];
+
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        color: AppColors.mainRed),
+                                    padding: EdgeInsets.all(5),
+                                    child: Center(
+                                      child: Text(
+                                        addedAdons.name ?? "",
+                                        style: AppStyles.poppinsText(
+                                            fontWeight: FontWeight.w500,
+                                            size: 14,
+                                            color: AppColors.whiteColor),
+                                      ),
+                                    ),
+                                  );
+                                }),
                       )),
             ]),
             SizedBox(
@@ -224,8 +285,25 @@ class _CreateMenuScreenState extends State<CreateMenuScreen> {
             SizedBox(
               height: 50,
             ),
-            CustomButtonWidget(
-                buttonText: 'Upload Menu', onPressed: () {}, isLoading: false)
+            Obx(
+              () => CustomButtonWidget(
+                  buttonText: 'Upload Menu',
+                  onPressed: () {
+                    var menu = {
+                      "name": _nameController.text,
+                      "description": _desController.text,
+                      "quantity": _quantityController.text,
+                      "price": priceController.text,
+                      "min_qty": _minQuantityController.text,
+                      "max_qty": _maxQuantityController.text,
+                      "image": _selectedImages.first.path,
+                      "addons": [menuController.addonList]
+                    };
+
+                    menuController.createMenuController(menu);
+                  },
+                  isLoading: menuController.creatingMenu.value),
+            )
           ],
         ),
       ),
@@ -243,59 +321,131 @@ class AddonWidget extends StatefulWidget {
 }
 
 final menuController = Get.put(VendorMenuController());
-TextEditingController adonTextController = TextEditingController();
+TextEditingController nameController = TextEditingController();
+TextEditingController descController = TextEditingController();
+TextEditingController priceController = TextEditingController();
+TextEditingController quantityController = TextEditingController();
 
 class _AddonWidgetState extends State<AddonWidget> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          color: AppColors.whiteColor),
-      padding: EdgeInsets.all(15),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Center(
-            child: Container(
-              height: 4,
-              width: 100,
-              color: AppColors.redColor,
+    return SingleChildScrollView(
+      child: Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            'Menu add-on',
-            style: AppStyles.poppinsText(
-                fontWeight: FontWeight.w900,
-                size: 15,
-                color: AppColors.blackColor),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          CustomInputWidget(
-            obscureText: false,
-            controller: adonTextController,
-            hintText: 'Add-on',
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          CustomButtonWidget(
-              buttonText: 'Add',
-              onPressed: () {
-                menuController.addon.add(adonTextController.text);
-                Get.back();
-                adonTextController.clear();
-              },
-              isLoading: false)
-        ],
+            color: AppColors.whiteColor),
+        padding: EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                height: 4,
+                width: 100,
+                color: AppColors.redColor,
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Center(
+              child: Text(
+                'Menu add-on',
+                style: AppStyles.poppinsText(
+                    fontWeight: FontWeight.w900,
+                    size: 15,
+                    color: AppColors.blackColor),
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Text(
+              'Name',
+              style: AppStyles.poppinsText(
+                  fontWeight: FontWeight.w400,
+                  size: 13,
+                  color: AppColors.blackColor),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: nameController,
+              hintText: 'name',
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Description',
+              style: AppStyles.poppinsText(
+                  fontWeight: FontWeight.w400,
+                  size: 13,
+                  color: AppColors.blackColor),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: descController,
+              hintText: 'description',
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Price',
+              style: AppStyles.poppinsText(
+                  fontWeight: FontWeight.w400,
+                  size: 13,
+                  color: AppColors.blackColor),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              hintText: 'price',
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Text(
+              'Quantity',
+              style: AppStyles.poppinsText(
+                  fontWeight: FontWeight.w400,
+                  size: 13,
+                  color: AppColors.blackColor),
+            ),
+            CustomInputWidget(
+              obscureText: false,
+              controller: quantityController,
+              hintText: 'Quantity',
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Obx(
+              () => CustomButtonWidget(
+                  buttonText: 'Add',
+                  onPressed: () {
+                    var param = {
+                      "name": nameController.text,
+                      "description": descController.text,
+                      "price": priceController.text,
+                      "quantity": quantityController.text,
+                      "image": ""
+                    };
+
+                    menuController.addon.add(nameController.text);
+                    // Get.back();
+                    nameController.clear();
+                    menuController.createAddonController(param);
+                  },
+                  isLoading: menuController.adding.value),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tyg_vendor/constants/app_colors.dart';
 import 'package:tyg_vendor/constants/app_style.dart';
 import 'package:tyg_vendor/features/authentication/presentation/login.dart';
 
 import '../../menue/presentation/create_menu.dart';
+import '../../menue/presentation/shop_menu.dart';
 import '../controller/profile.dart';
 import 'update_shop.dart';
 
@@ -56,8 +58,7 @@ class ProfileScreen extends StatelessWidget {
                               ? DecorationImage(
                                   fit: BoxFit.cover,
                                   image: NetworkImage(
-                                    _profileController
-                                        .loadedModel.value.data!.background!,
+                                    "https://dashboard.toyourgateexpress.com/storage/${_profileController.loadedModel.value.data?.logo}",
                                   ),
                                 )
                               : null,
@@ -152,9 +153,11 @@ class ProfileScreen extends StatelessWidget {
                             ),
                             ProfileActionTile(
                               leadingIcon: Icon(Icons.history),
-                              name: 'My order History ',
+                              name: 'My Menu',
                               icon: Icon(Icons.arrow_forward_ios),
-                              onPressed: () {},
+                              onPressed: () {
+                                Get.to(() => MenuScreen());
+                              },
                             ),
                             ProfileActionTile(
                               name: 'Notifications',
@@ -166,7 +169,12 @@ class ProfileScreen extends StatelessWidget {
                               name: 'Logout',
                               leadingIcon: Icon(Icons.logout),
                               icon: Icon(Icons.arrow_forward_ios),
-                              onPressed: () {},
+                              onPressed: () async {
+                                SharedPreferences preferences =
+                                    await SharedPreferences.getInstance();
+                                preferences.clear();
+                                Get.offAll(() => LoginScreen());
+                              },
                             ),
                             ProfileActionTile(
                               name: 'Support',

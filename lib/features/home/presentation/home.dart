@@ -3,8 +3,10 @@ import 'package:get/get.dart';
 import 'package:tyg_vendor/constants/app_colors.dart';
 import 'package:tyg_vendor/constants/app_style.dart';
 import 'package:tyg_vendor/features/authentication/presentation/login.dart';
+import 'package:tyg_vendor/features/order/model/pending_order.dart';
 
 import '../../menue/presentation/create_menu.dart';
+import '../../order/controller/order.dart';
 import '../../profile/controller/profile.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,9 +23,14 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    orderController.getPendingOrderController();
+    orderController.getDeliveredOrders();
+    orderController.getActiveOrders();
+    orderController.getOndGoOrders();
     tabController = TabController(length: 4, vsync: this);
   }
 
+  final orderController = Get.put(OrderController());
   final profileController = Get.put(ProfileController());
   @override
   Widget build(BuildContext context) {
@@ -94,20 +101,20 @@ class _HomeScreenState extends State<HomeScreen>
                 text: 'pending Orders',
               ),
               Tab(
-                text: 'Delivered Orders',
+                text: 'On The go',
               ),
               Tab(
-                text: 'On The go',
+                text: 'Delivered Orders',
               ),
             ],
             labelColor: Colors.black,
           ),
           Expanded(
-              child: TabBarView(controller: tabController, children: const [
+              child: TabBarView(controller: tabController, children: [
             OrdersWidget(),
-            OrdersWidget(),
-            OrdersWidget(),
-            OnTheGoWidget()
+            PendingOrdersWidget(),
+            OndGoOtherWidget(),
+            DeliveredOrderWidget()
           ]))
         ],
       ),
@@ -116,111 +123,366 @@ class _HomeScreenState extends State<HomeScreen>
 }
 
 class OrdersWidget extends StatelessWidget {
-  const OrdersWidget({
+  OrdersWidget({
     super.key,
   });
 
+  final orderController = Get.put(OrderController());
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView.separated(
-          separatorBuilder: (context, index) => Divider(
-                indent: 10,
-                color: AppColors.whiteColor,
+    return Obx(
+      () => orderController.loadingActiveOrders.value
+          ? Center(
+              child: CustomLoaderWidget(
+                color: AppColors.redColor,
               ),
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                Get.bottomSheet(
-                  OrderConfirmationModal(),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: AppColors.whiteColor,
-                  border:
-                      Border.all(color: AppColors.blackColor.withOpacity(0.2)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.blackColor.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 1,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 40,
-                          width: 40,
+            )
+          : orderController.activeOrderModel.value.data!.isEmpty
+              ? Center(
+                  child: Text('No Active orders'),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.separated(
+                      separatorBuilder: (context, index) => Divider(
+                            indent: 10,
+                            color: AppColors.whiteColor,
+                          ),
+                      itemCount:
+                          orderController.activeOrderModel.value.data!.length,
+                      itemBuilder: (context, index) {
+                        var activeOrder =
+                            orderController.activeOrderModel.value.data![index];
+                        return Container(
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: AssetImage('assets/images/back.jpg'))),
-                        ),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        Text(
-                          '4 plate Rice ',
-                          style: AppStyles.poppinsText(
-                              fontWeight: FontWeight.w500,
-                              size: 14,
-                              color: AppColors.blackColor),
-                        ),
-                        Spacer(),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'payment Type',
-                              style: AppStyles.poppinsText(
-                                  fontWeight: FontWeight.w400,
-                                  size: 14,
-                                  color: AppColors.blackColor),
-                            ),
-                            Text(
-                              'CASH',
-                              style: AppStyles.poppinsText(
-                                  fontWeight: FontWeight.w400,
-                                  size: 12,
-                                  color: AppColors.mainRed),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    Divider(
-                      color: AppColors.blackColor.withOpacity(0.1),
-                    ),
-                    Text(
-                      'Delivery Address: 4th street gwarimpa',
-                      style: AppStyles.poppinsText(
-                          fontWeight: FontWeight.w500, size: 14),
-                    )
-                  ],
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.whiteColor,
+                            border: Border.all(
+                                color: AppColors.blackColor.withOpacity(0.2)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.blackColor.withOpacity(0.1),
+                                spreadRadius: 1,
+                                blurRadius: 1,
+                                offset: const Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: NetworkImage(
+                                                'https://dashboard.toyourgateexpress.com/storage/${activeOrder.orderDetails!.image}'))),
+                                  ),
+                                  SizedBox(
+                                    width: 6,
+                                  ),
+                                  Text(
+                                    activeOrder.orderDetails?.name ?? "",
+                                    style: AppStyles.poppinsText(
+                                        fontWeight: FontWeight.w500,
+                                        size: 14,
+                                        color: AppColors.blackColor),
+                                  ),
+                                  Spacer(),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'payment Type',
+                                        style: AppStyles.poppinsText(
+                                            fontWeight: FontWeight.w400,
+                                            size: 14,
+                                            color: AppColors.blackColor),
+                                      ),
+                                      Text(
+                                        'CASH',
+                                        style: AppStyles.poppinsText(
+                                            fontWeight: FontWeight.w400,
+                                            size: 12,
+                                            color: AppColors.mainRed),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Divider(
+                                color: AppColors.blackColor.withOpacity(0.1),
+                              ),
+                              Text(
+                                'Delivery Address: ${activeOrder.address?.address}',
+                                style: AppStyles.poppinsText(
+                                    fontWeight: FontWeight.w500, size: 14),
+                              )
+                            ],
+                          ),
+                        );
+                      }),
                 ),
+    );
+  }
+}
+
+class OndGoOtherWidget extends StatelessWidget {
+  OndGoOtherWidget({
+    super.key,
+  });
+
+  final orderController = Get.put(OrderController());
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => orderController.loadingonDGoOrders.value
+          ? Center(
+              child: CustomLoaderWidget(
+                color: AppColors.redColor,
               ),
-            );
-          }),
+            )
+          : orderController.onDGoModel.value.data!.isEmpty
+              ? Center(
+                  child: Text('No Active orders'),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.separated(
+                      separatorBuilder: (context, index) => Divider(
+                            indent: 10,
+                            color: AppColors.whiteColor,
+                          ),
+                      itemCount: orderController.onDGoModel.value.data!.length,
+                      itemBuilder: (context, index) {
+                        var activeOrder =
+                            orderController.activeOrderModel.value.data![index];
+                        return Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.whiteColor,
+                            border: Border.all(
+                                color: AppColors.blackColor.withOpacity(0.2)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.blackColor.withOpacity(0.1),
+                                spreadRadius: 1,
+                                blurRadius: 1,
+                                offset: const Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    height: 40,
+                                    width: 40,
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            fit: BoxFit.cover,
+                                            image: NetworkImage(
+                                                'https://dashboard.toyourgateexpress.com/storage/${activeOrder.orderDetails!.image}'))),
+                                  ),
+                                  SizedBox(
+                                    width: 6,
+                                  ),
+                                  Text(
+                                    activeOrder.orderDetails?.name ?? "",
+                                    style: AppStyles.poppinsText(
+                                        fontWeight: FontWeight.w500,
+                                        size: 14,
+                                        color: AppColors.blackColor),
+                                  ),
+                                  Spacer(),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'payment Type',
+                                        style: AppStyles.poppinsText(
+                                            fontWeight: FontWeight.w400,
+                                            size: 14,
+                                            color: AppColors.blackColor),
+                                      ),
+                                      Text(
+                                        'CASH',
+                                        style: AppStyles.poppinsText(
+                                            fontWeight: FontWeight.w400,
+                                            size: 12,
+                                            color: AppColors.mainRed),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                              Divider(
+                                color: AppColors.blackColor.withOpacity(0.1),
+                              ),
+                              Text(
+                                'Delivery Address: ${activeOrder.address?.address}',
+                                style: AppStyles.poppinsText(
+                                    fontWeight: FontWeight.w500, size: 14),
+                              )
+                            ],
+                          ),
+                        );
+                      }),
+                ),
+    );
+  }
+}
+
+class PendingOrdersWidget extends StatelessWidget {
+  PendingOrdersWidget({
+    super.key,
+  });
+
+  final orderController = Get.put(OrderController());
+  final profileController = Get.put(ProfileController());
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => orderController.loadingPendingOrders.value
+          ? Center(
+              child: CustomLoaderWidget(
+                color: AppColors.redColor,
+              ),
+            )
+          : orderController.loadedPendingOrders.value.data!.isEmpty
+              ? Center(
+                  child: Text(
+                    'You have no pending orders',
+                    style: AppStyles.poppinsText(
+                        fontWeight: FontWeight.w400,
+                        size: 14,
+                        color: AppColors.blackColor),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.separated(
+                      separatorBuilder: (context, index) => Divider(
+                            indent: 10,
+                            color: AppColors.redColor,
+                          ),
+                      itemCount: orderController
+                          .loadedPendingOrders.value.data!.length,
+                      itemBuilder: (context, index) {
+                        var orders = orderController
+                            .loadedPendingOrders.value.data![index];
+                        return GestureDetector(
+                          onTap: () {
+                            Get.bottomSheet(
+                              OrderConfirmationModal(
+                                product: orders,
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: AppColors.whiteColor,
+                              border: Border.all(
+                                  color: AppColors.blackColor.withOpacity(0.2)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.blackColor.withOpacity(0.1),
+                                  spreadRadius: 1,
+                                  blurRadius: 1,
+                                  offset: const Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                            padding: EdgeInsets.all(8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      height: 40,
+                                      width: 40,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              fit: BoxFit.cover,
+                                              image: orders.orderDetails!
+                                                          .image ==
+                                                      null
+                                                  ? NetworkImage(
+                                                      'https://www.istockphoto.com/vector/store-line-icon-outline-vector-symbol-illustration-pixel-perfect-editable-stroke-gm1194059544-339859993')
+                                                  : NetworkImage(
+                                                      'https://dashboard.toyourgateexpress.com/storage/${orders.orderDetails!.image}'))),
+                                    ),
+                                    SizedBox(
+                                      width: 6,
+                                    ),
+                                    Text(
+                                      orders.orderDetails?.name ?? '',
+                                      style: AppStyles.poppinsText(
+                                          fontWeight: FontWeight.w500,
+                                          size: 14,
+                                          color: AppColors.blackColor),
+                                    ),
+                                    Spacer(),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          'payment Type',
+                                          style: AppStyles.poppinsText(
+                                              fontWeight: FontWeight.w400,
+                                              size: 14,
+                                              color: AppColors.blackColor),
+                                        ),
+                                        Text(
+                                          orders.orderDetails?.price ?? '',
+                                          style: AppStyles.poppinsText(
+                                              fontWeight: FontWeight.w400,
+                                              size: 12,
+                                              color: AppColors.mainRed),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                                Divider(
+                                  color: AppColors.blackColor.withOpacity(0.1),
+                                ),
+                                Text(
+                                  orders.address?.address ?? '',
+                                  style: AppStyles.poppinsText(
+                                      fontWeight: FontWeight.w500, size: 14),
+                                )
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                ),
     );
   }
 }
 
 class OrderConfirmationModal extends StatelessWidget {
-  const OrderConfirmationModal({
+  final PendingOrderDatum product;
+  OrderConfirmationModal({
     super.key,
+    required this.product,
   });
-
+  final orderController = Get.put(OrderController());
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -257,20 +519,24 @@ class OrderConfirmationModal extends StatelessWidget {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                           fit: BoxFit.cover,
-                          image: AssetImage('assets/images/logo.png'))),
+                          image: product.orderDetails!.image == null
+                              ? NetworkImage(
+                                  'https://www.istockphoto.com/vector/store-line-icon-outline-vector-symbol-illustration-pixel-perfect-editable-stroke-gm1194059544-339859993')
+                              : NetworkImage(
+                                  'https://dashboard.toyourgateexpress.com/storage/${product.orderDetails!.image}'))),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ThankGod Eze',
+                      product.orderDetails?.name ?? '',
                       style: AppStyles.poppinsText(
                           fontWeight: FontWeight.w400,
                           size: 16,
                           color: AppColors.blackColor),
                     ),
                     Text(
-                      '4th street. gwarimpa',
+                      product.address?.address ?? '',
                       style: AppStyles.poppinsText(
                           fontWeight: FontWeight.w600,
                           size: 13,
@@ -289,7 +555,7 @@ class OrderConfirmationModal extends StatelessWidget {
                           color: AppColors.redColor),
                     ),
                     Text(
-                      '\$3,000',
+                      '\$${product.orderDetails?.price}',
                       style: AppStyles.poppinsText(
                           fontWeight: FontWeight.w500,
                           size: 14,
@@ -321,7 +587,7 @@ class OrderConfirmationModal extends StatelessWidget {
             ),
             padding: EdgeInsets.all(10),
             child: Text(
-              'Jellof rice (3plates)',
+              product.orderDetails?.name ?? '',
               style: AppStyles.poppinsText(
                   fontWeight: FontWeight.w500,
                   size: 14,
@@ -331,115 +597,137 @@ class OrderConfirmationModal extends StatelessWidget {
           SizedBox(
             height: 40,
           ),
-          CustomButtonWidget(
-              buttonText: 'Confirm Order',
-              onPressed: () {
-                Get.back();
-              },
-              isLoading: false)
+          Obx(
+            () => CustomButtonWidget(
+                buttonText: 'Confirm Order',
+                onPressed: () async {
+                  await orderController.updateOrderController(product.orderId);
+                  Get.back();
+                },
+                bgcolor: AppColors.greenColor,
+                isLoading: orderController.isLoading.value),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Obx(
+            () => CustomButtonWidget(
+                buttonText: 'Cancel Order',
+                onPressed: () {
+                  orderController.declineOrderController(product.orderId);
+                  Get.back();
+                },
+                bgcolor: AppColors.mainRed,
+                isLoading: orderController.declining.value),
+          )
         ],
       ),
     );
   }
 }
 
-class OnTheGoWidget extends StatelessWidget {
-  const OnTheGoWidget({
+class DeliveredOrderWidget extends StatelessWidget {
+  DeliveredOrderWidget({
     super.key,
   });
-
+  final ordersController = Get.put(OrderController());
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: ListView.separated(
-          separatorBuilder: (context, index) => Divider(
-                indent: 10,
-                color: AppColors.whiteColor,
+    return Obx(
+      () => ordersController.loadingDeliveredOrders.value
+          ? Center(
+              child: CustomLoaderWidget(
+                color: AppColors.redColor,
               ),
-          itemCount: 5,
-          itemBuilder: (context, index) {
-            return GestureDetector(
-              onTap: () {
-                // Get.bottomSheet(
-                //     // OrderConfirmationModal(),
-                //     );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: AppColors.whiteColor,
-                  border:
-                      Border.all(color: AppColors.blackColor.withOpacity(0.2)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.blackColor.withOpacity(0.1),
-                      spreadRadius: 1,
-                      blurRadius: 1,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
-                ),
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 40,
-                          width: 40,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: AssetImage('assets/images/back.jpg'))),
-                        ),
-                        SizedBox(
-                          width: 6,
-                        ),
-                        Text(
-                          '4 plate Rice ',
-                          style: AppStyles.poppinsText(
-                              fontWeight: FontWeight.w500,
-                              size: 14,
-                              color: AppColors.blackColor),
-                        ),
-                        Spacer(),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Status:',
-                              style: AppStyles.poppinsText(
-                                  fontWeight: FontWeight.w400,
-                                  size: 14,
-                                  color: AppColors.blackColor),
-                            ),
-                            Text(
-                              'Delivered',
-                              style: AppStyles.poppinsText(
-                                  fontWeight: FontWeight.w400,
-                                  size: 12,
-                                  color: AppColors.mainRed),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                    Divider(
-                      color: AppColors.blackColor.withOpacity(0.1),
-                    ),
-                    Text(
-                      'Delivered to Rexdomine ',
-                      style: AppStyles.poppinsText(
-                          fontWeight: FontWeight.w500, size: 14),
-                    )
-                  ],
-                ),
-              ),
-            );
-          }),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.separated(
+                  separatorBuilder: (context, index) => Divider(
+                        indent: 10,
+                        color: AppColors.whiteColor,
+                      ),
+                  itemCount:
+                      ordersController.loadedDeliveredOrders.value.data!.length,
+                  itemBuilder: (context, index) {
+                    var deliveries = ordersController
+                        .loadedDeliveredOrders.value.data![index];
+                    return Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: AppColors.whiteColor,
+                        border: Border.all(
+                            color: AppColors.blackColor.withOpacity(0.2)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.blackColor.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 1,
+                            offset: const Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: NetworkImage(
+                                            'https://dashboard.toyourgateexpress.com/storage/${deliveries.orderDetails!.image}'))),
+                              ),
+                              SizedBox(
+                                width: 6,
+                              ),
+                              Text(
+                                deliveries.orderDetails?.name ?? "",
+                                style: AppStyles.poppinsText(
+                                    fontWeight: FontWeight.w500,
+                                    size: 14,
+                                    color: AppColors.blackColor),
+                              ),
+                              Spacer(),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Status:',
+                                    style: AppStyles.poppinsText(
+                                        fontWeight: FontWeight.w400,
+                                        size: 14,
+                                        color: AppColors.blackColor),
+                                  ),
+                                  Text(
+                                    'Delivered',
+                                    style: AppStyles.poppinsText(
+                                        fontWeight: FontWeight.w400,
+                                        size: 12,
+                                        color: AppColors.mainRed),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                          Divider(
+                            color: AppColors.blackColor.withOpacity(0.1),
+                          ),
+                          Text(
+                            'Delivered to ${deliveries.customer?.name} ',
+                            style: AppStyles.poppinsText(
+                                fontWeight: FontWeight.w500, size: 14),
+                          )
+                        ],
+                      ),
+                    );
+                  }),
+            ),
     );
   }
 }

@@ -22,4 +22,15 @@ class MenuRepository {
     final request = HttpService.httpPostCall(ApiRoutes.loginRoute, params);
     return request;
   }
+
+  Future createAddonRepo(param) async {
+    final request =
+        await HttpService.httpPostCall(ApiRoutes.createAddOn, param);
+    return request;
+  }
+
+  Future getAddonsRepo() async {
+    final request = await HttpService.httpGetCall(ApiRoutes.getAddons);
+    return request;
+  }
 }

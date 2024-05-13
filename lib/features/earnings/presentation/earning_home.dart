@@ -41,21 +41,21 @@ class EarningScreen extends StatelessWidget {
           padding: const EdgeInsets.all(13.0),
           child: Column(
             children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: CustomInputWidget(
-                      hintText: 'Search',
-                      obscureText: false,
-                    ),
-                  ),
-                  Icon(
-                    Icons.filter_alt,
-                    color: AppColors.mainRed,
-                    size: 40,
-                  )
-                ],
-              ),
+              // Row(
+              //   children: [
+              //     Flexible(
+              //       child: CustomInputWidget(
+              //         hintText: 'Search',
+              //         obscureText: false,
+              //       ),
+              //     ),
+              //     Icon(
+              //       Icons.filter_alt,
+              //       color: AppColors.mainRed,
+              //       size: 40,
+              //     )
+              //   ],
+              // ),
               SizedBox(
                 height: 20,
               ),
